@@ -54,8 +54,8 @@ main { max-width: 75rem; margin: auto; padding: clamp(3rem, 8vw, 7rem) clamp(1.2
 .hero-visual { position: relative; }
 .hero-copy { position: absolute; z-index: 1; top: 50%; left: clamp(.9rem, 4%, 1.6rem); width: 62%; transform: translateY(-50%); }
 .hero-visual h1 { margin: 0; color: rgb(255 255 255 / 70%); font-size: clamp(2.65rem, 5.35vw, 4.65rem); line-height: 1.01; letter-spacing: -.065em; text-shadow: 0 2px 14px rgb(0 0 0 / 68%); }
-.hero-visual .qr-card { display: grid !important; grid-template-rows: minmax(0, 1fr) auto; place-items: center; gap: .1rem; box-sizing: border-box; width: clamp(4.7rem, 9vw, 5.8rem) !important; height: clamp(4.7rem, 9vw, 5.8rem); min-width: 0; margin-top: clamp(.75rem, 1.8vw, 1.1rem); padding: .35rem .35rem .3rem; overflow: hidden; border-color: rgb(255 255 255 / 35%); border-radius: .75rem; box-shadow: 0 .45rem 1.25rem rgb(0 0 0 / 30%); font-size: .5rem; line-height: 1; }
-.hero-visual .qr-card img { display: block; align-self: end; width: 68% !important; height: auto !important; max-height: 100%; aspect-ratio: 1; object-fit: contain; }
-.hero-visual .qr-card span { display: block; white-space: nowrap; line-height: 1; }
+.hero-visual .qr-card { display: flex !important; flex-direction: column; align-items: center; justify-content: center; gap: .2rem; box-sizing: border-box; width: clamp(4.7rem, 9vw, 5.8rem) !important; height: clamp(4.7rem, 9vw, 5.8rem); min-width: 0; margin-top: clamp(.75rem, 1.8vw, 1.1rem); padding: .35rem; overflow: hidden; border-color: rgb(255 255 255 / 35%); border-radius: .75rem; box-shadow: 0 .45rem 1.25rem rgb(0 0 0 / 30%); font-size: .42rem; line-height: 1; }
+.hero-visual .qr-card img { display: block; flex: 0 0 auto; width: 74% !important; height: auto !important; aspect-ratio: 1; object-fit: contain; }
+.hero-visual .qr-card span { display: block; flex: 0 0 auto; white-space: nowrap; line-height: 1; text-transform: none; }
 .planner-intro { max-width: 34rem; }
-@media (max-width: 48rem) { .hero-copy { width: 64%; }.hero-visual h1 { font-size: clamp(2.45rem, 10vw, 3.6rem); }.hero-visual .qr-card { width: 4.55rem !important; height: 4.55rem; font-size: .5rem; } }
+@media (max-width: 48rem) { .hero-copy { width: 64%; }.hero-visual h1 { font-size: clamp(2.45rem, 10vw, 3.6rem); }.hero-visual .qr-card { width: 4.55rem !important; height: 4.55rem; font-size: .42rem; } }
