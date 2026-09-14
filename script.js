@@ -22,8 +22,8 @@ const hourlyForecastElement = document.querySelector("#hourly-forecast");
 const daySelect = document.querySelector("#ride-day");
 const rideTimeSelect = document.querySelector("#ride-time");
 const warning = document.querySelector("#ride-warning");
-const settingsDialog = document.querySelector("#settings-dialog");
-const settingsButton = document.querySelector("#settings-button");
+const appViews = document.querySelectorAll("[data-view]");
+const appNavLinks = document.querySelectorAll("[data-nav]");
 const connectStravaButton = document.querySelector("#connect-strava");
 const stravaConsent = document.querySelector("#strava-consent");
 const stravaStatus = document.querySelector("#strava-status");
@@ -67,9 +67,13 @@ function showSavedImportStatus() {
   importStatus.dataset.state = "success";
   importStatus.textContent = `${importedRoutes.length} imported route patterns are saved on this device.`;
 }
+const compassDegrees = { N: 0, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, ESE: 112.5, SE: 135, SSE: 157.5, S: 180, SSW: 202.5, SW: 225, WSW: 247.5, W: 270, WNW: 292.5, NW: 315, NNW: 337.5 };
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]);
+}
 function windForHour(hour, day = selectedDay()) {
   const forecast = day.hours.find(item => item.hour === hour) || day.hours[2];
-  return { from: forecast.direction === "SW" ? 225 : 205, speed: forecast.speed, label: forecast.direction, gusts: forecast.gusts, temp: forecast.temp, precipitation: forecast.precipitation };
+  return { from: compassDegrees[forecast.direction], speed: forecast.speed, label: forecast.direction, gusts: forecast.gusts, temp: forecast.temp, precipitation: forecast.precipitation };
 }
 function formatHour(hour) { return `${hour > 12 ? hour - 12 : hour}:00 ${hour >= 12 ? "PM" : "AM"}`; }
 function renderHourlyForecast(selectedHour, day) {
@@ -129,12 +133,25 @@ function renderRouteMode() {
   if (exploring && !currentLocation) locationStatus.textContent = "Choose your location to start routes near you. Demo routes are shown until routing is connected.";
   findRideButton.childNodes[0].textContent = exploring ? "Explore routes " : "Find my ride ";
 }
+function showView() {
+  const requestedView = location.hash.slice(1);
+  const currentView = ["plan", "weather", "routes", "settings"].includes(requestedView) ? requestedView : "plan";
+  appViews.forEach(view => { view.hidden = view.dataset.view !== currentView; });
+  appNavLinks.forEach(link => {
+    if (link.dataset.nav === currentView) link.setAttribute("aria-current", "page");
+    else link.removeAttribute("aria-current");
+  });
+  window.scrollTo(0, 0);
+}
 function renderRoutes() {
   const desiredMiles = Number(distance.value); const hour = Number(document.querySelector("#ride-time").value); const preference = document.querySelector("#wind-preference").value; const rideType = document.querySelector("#ride-type").value; const day = selectedDay(); const weather = windForHour(hour, day);
   const exploring = routeMode() === "explore";
   const savedRoutes = importedRoutes.length ? importedRoutes : demoRoutes;
   const baseRoutes = exploring ? exploredRoutes(desiredMiles) : savedRoutes;
-  const sorted = baseRoutes.map(route => ({ ...route, score: scoreRoute(route, desiredMiles, preference, rideType, weather) })).sort((a, b) => b.score - a.score);
+  const shortestMatch = desiredMiles - 5;
+  const longestMatch = desiredMiles + Math.max(7, Math.round(desiredMiles * .1));
+  const matchingRoutes = baseRoutes.filter(route => route.miles >= shortestMatch && route.miles <= longestMatch);
+  const sorted = matchingRoutes.map(route => ({ ...route, score: scoreRoute(route, desiredMiles, preference, rideType, weather) })).sort((a, b) => b.score - a.score);
   conditionsSummary.textContent = `${weather.label} ${weather.speed} mph at ${hour}:00 AM`;
   renderHourlyForecast(hour, day);
   renderDayDetails(day, hour);
@@ -142,11 +159,17 @@ function renderRoutes() {
   document.querySelector("#recommendations-title").textContent = exploring ? `Wind-aware routes for ${dayLabel(day.dayIndex)}` : `Your best routes for ${dayLabel(day.dayIndex)}`;
   document.querySelector("#route-count").textContent = exploring ? "3" : savedRoutes.length;
   document.querySelector("#route-count-label").textContent = exploring ? "route ideas" : importedRoutes.length ? "imported routes" : "saved routes";
-  document.querySelector("#method-title").innerHTML = exploring ? "Routes built around<br />your ride window." : importedRoutes.length ? "Your GPS tracks,<br />ranked by weather." : "Real route geometry,<br />not guesswork.";
-  document.querySelector("#method-copy").textContent = exploring ? "This prototype creates route concepts from your chosen distance and wind preference. Production Ridewise™ will request routes from a cycling-aware map service, check road access and elevation, then return usable map geometry and GPX export." : importedRoutes.length ? "Ridewise keeps a simplified copy of each imported GPS track on this device, then compares its direction with your selected forecast and wind preference." : "Each route is divided into small GPS segments. The planner compares the direction of every segment with the expected wind at the time you'll reach it—so “headwind out, tailwind home” is based on the road beneath your wheels.";
+  document.querySelector("#method-title").innerHTML = exploring ? "Routes built around<br />your ride window." : importedRoutes.length ? "Your GPS tracks,<br />ranked by weather." : "Wind-aware ranking,<br />made clear.";
+  document.querySelector("#method-copy").textContent = exploring ? "This prototype creates route concepts from your chosen distance and wind preference. Production Ridewise™ will request routes from a cycling-aware map service, check road access and elevation, then return usable map geometry and GPX export." : importedRoutes.length ? "Ridewise keeps a simplified copy of each imported GPS track on this device. The current ranking uses each route's outbound heading, distance, and climbing against the selected demo forecast; segment-by-segment scoring is still planned." : "This demo ranks routes by distance, climbing, and the direction of the outbound leg against the selected wind. Segment-by-segment scoring will follow when live forecasts and full route geometry are connected.";
   const visibleRoutes = sorted.slice(0, exploring ? 3 : importedRoutes.length ? 12 : 4);
   displayedRoutes = visibleRoutes.map(route => ({ ...route, reason: routeReason(route, preference, weather), exploring }));
-  routeList.innerHTML = displayedRoutes.map((route, index) => `<article class="route-card" data-route-index="${index}" role="button" tabindex="0" aria-label="Preview ${route.name}"><div class="rank">${["🥇", "🥈", "🥉", "4"][index]}</div><div><h3 class="route-name">${route.name}</h3><p class="route-meta">${route.miles.toFixed(1)} mi · ${route.elevation.toLocaleString()} ft · ${exploring ? route.detail : `ridden ${route.rides} times`}</p>${exploring ? `<span class="route-origin">${route.origin}</span>` : route.imported ? `<span class="route-origin">Imported from Strava export</span>` : ""}</div><p class="route-reason">${route.reason}</p><div class="score"><strong>${route.score}</strong><span>ride match</span></div></article>`).join("");
+  if (!displayedRoutes.length) {
+    const nearestRoute = baseRoutes.reduce((nearest, route) => !nearest || Math.abs(route.miles - desiredMiles) < Math.abs(nearest.miles - desiredMiles) ? route : nearest, null);
+    const nearestText = nearestRoute ? ` The closest available route is ${nearestRoute.miles.toFixed(1)} miles.` : "";
+    routeList.innerHTML = `<p class="route-empty">No saved routes match ${desiredMiles} miles (range: ${shortestMatch}–${longestMatch} miles).${nearestText} Try another distance or choose Explore nearby for demo route ideas.</p>`;
+    return;
+  }
+  routeList.innerHTML = displayedRoutes.map((route, index) => `<article class="route-card" data-route-index="${index}" role="button" tabindex="0" aria-label="Preview ${escapeHtml(route.name)}"><div class="rank">${["🥇", "🥈", "🥉", "4"][index]}</div><div><h3 class="route-name">${escapeHtml(route.name)}</h3><p class="route-meta">${route.miles.toFixed(1)} mi · ${route.elevation.toLocaleString()} ft · ${exploring ? route.detail : `ridden ${route.rides} times`}</p>${exploring ? `<span class="route-origin">${route.origin}</span>` : route.imported ? `<span class="route-origin">Imported from Strava export</span>` : ""}</div><p class="route-reason">${route.reason}</p><div class="score"><strong>${route.score}</strong><span>ride match</span></div></article>`).join("");
 }
 function openRoutePreview(index) {
   const route = displayedRoutes[index];
@@ -271,14 +294,14 @@ async function processActivityImport(importer, statusElement = importStatus, sou
     if (!importedRoutes.length) throw new Error("No cycling GPX tracks were found in that archive.");
     saveImportedRoutes(importedRoutes);
     statusElement.dataset.state = "success";
-    statusElement.textContent = `Imported ${importedRoutes.length} route patterns from ${sourceName}. Demo routes have been replaced.`;
+    statusElement.textContent = `Imported ${importedRoutes.length} GPX route patterns from ${sourceName}. FIT and TCX activities are not supported yet. Demo routes have been replaced.`;
     renderRoutes();
   } catch (error) {
     statusElement.dataset.state = "error";
     statusElement.textContent = error.message || "The import could not be completed.";
   }
 }
-distance.addEventListener("input", () => { distanceOutput.textContent = `${distance.value} mi`; });
+distance.addEventListener("input", () => { distanceOutput.textContent = `${distance.value} mi`; renderRoutes(); });
 document.querySelector("#ride-time").addEventListener("change", renderRoutes);
 daySelect.addEventListener("change", renderRoutes);
 routeModeInputs.forEach(input => input.addEventListener("change", () => { renderRouteMode(); renderRoutes(); }));
@@ -341,8 +364,7 @@ document.querySelector("#export-garmin-button")?.addEventListener("click", () =>
   exportStatus.textContent = "Demo preview: Garmin export will be available after Ridewise™ is approved for Garmin's Courses API and the route has real GPS geometry.";
 });
 routePreviewDialog?.addEventListener("click", event => { if (event.target === routePreviewDialog) routePreviewDialog.close(); });
-settingsButton?.addEventListener("click", () => settingsDialog?.showModal());
-document.querySelector("#close-settings")?.addEventListener("click", () => settingsDialog?.close());
+document.querySelector("#close-settings")?.addEventListener("click", () => { location.hash = "plan"; });
 connectStravaButton?.addEventListener("click", () => {
   if (isStravaConnected) {
     isStravaConnected = false;
@@ -379,11 +401,12 @@ document.querySelector("#complete-garmin-connection")?.addEventListener("click",
   connectGarminButton.hidden = false;
   garminConsent.hidden = true;
 });
-settingsDialog?.addEventListener("click", event => { if (event.target === settingsDialog) settingsDialog.close(); });
-form.addEventListener("submit", event => { event.preventDefault(); renderRoutes(); document.querySelector(".results").scrollIntoView({ behavior: "smooth", block: "start" }); });
+form.addEventListener("submit", event => { event.preventDefault(); renderRoutes(); location.hash = "routes"; showView(); });
+window.addEventListener("hashchange", showView);
 menus.forEach(menu => menu.addEventListener("toggle", () => { if (menu.open) menus.forEach(other => { if (other !== menu) other.open = false; }); }));
 document.addEventListener("click", event => { if (!event.target.closest(".menu")) menus.forEach(menu => { menu.open = false; }); });
 if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js"));
 showSavedImportStatus();
 renderRouteMode();
 renderRoutes();
+showView();

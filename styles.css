@@ -21,3 +21,28 @@ main { max-width: 75rem; margin: auto; padding: clamp(3rem, 8vw, 7rem) clamp(1.2
 @media (max-width: 48rem) { .planner { grid-template-columns: 1fr; }.route-card { grid-template-columns: auto 1fr auto; gap: .8rem; }.route-reason { grid-column: 2 / -1; max-width: none; }.method { grid-template-columns: 1fr; }.method > p { margin: 0; }.topbar { padding-inline: 1rem; }.brand { margin-right: .7rem; }.menu-bar { gap: 0; }.menu summary { padding-inline: .42rem; font-size: .8rem; } }
 @media (max-width: 48rem) { main { padding-bottom: 7rem; }.mobile-dock { position: fixed; z-index: 20; right: 1rem; bottom: max(1rem, env(safe-area-inset-bottom)); left: 1rem; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: .35rem; border: 1px solid rgb(255 255 255 / 13%); border-radius: 1rem; background: rgb(26 33 51 / 90%); box-shadow: 0 .8rem 2rem rgb(0 0 0 / 35%); backdrop-filter: blur(16px); }.mobile-dock a, .mobile-dock button { display: grid; justify-items: center; align-content: center; gap: .1rem; min-width: 0; min-height: 3rem; border: 0; border-radius: .7rem; background: transparent; color: #d6deef; cursor: pointer; font-size: .7rem; font-weight: 700; text-align: center; text-decoration: none; }.mobile-dock a:active, .mobile-dock button:active { background: rgb(167 239 125 / 18%); }.mobile-dock span { display: block; color: #a7ef7d; font-size: 1.15rem; line-height: 1; } }
 @media (max-width: 26rem) { .menu summary { font-size: .72rem; padding-inline: .3rem; }.brand { font-size: 1rem; }.intro-with-qr { display: grid !important; grid-template-columns: minmax(0, 1fr) 3.15rem; gap: .6rem; align-items: center; }.intro { font-size: .88rem; }.qr-card { width: 3.15rem !important; height: 3.15rem; min-width: 3.15rem; font-size: .31rem; }.qr-card img { width: 2.76rem !important; height: 2.45rem !important; } }
+
+.route-empty { margin: 0; padding: 1.2rem; border: 1px solid rgb(255 255 255 / 13%); border-radius: .9rem; background: rgb(255 255 255 / 4%); color: #dfe5f1; line-height: 1.5; }
+
+[hidden] { display: none !important; }
+.app-view { min-height: calc(100dvh - 12rem); }
+.forecast-detail, .results { padding-top: 0; }
+.method { margin-top: 3.5rem; }
+.settings-dialog { width: 100%; max-width: 54rem; min-height: calc(100dvh - 12rem); margin: 0 auto; padding: 0; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
+.mobile-dock [aria-current="page"] { background: rgb(167 239 125 / 15%); color: #fff; }
+@media (max-width: 48rem) {
+  main { padding-top: 1.5rem; }
+  .planner { min-height: 0; gap: 1.5rem; }
+  .planner h1 { font-size: clamp(2.7rem, 10vw, 4.2rem); }
+  .topbar { min-height: 3.4rem; }
+  .menu-bar { display: none; }
+  .app-view, .settings-dialog { min-height: calc(100dvh - 10rem); }
+  .mobile-dock a[aria-current="page"] { background: rgb(167 239 125 / 16%); color: #fff; }
+}
+
+@media (min-width: 48.01rem) {
+  .mobile-dock { position: sticky; top: 3.8rem; z-index: 9; display: flex; gap: .4rem; max-width: 75rem; margin: 0 auto; padding: .65rem clamp(1.25rem, 5vw, 5rem); background: rgb(13 18 32 / 88%); backdrop-filter: blur(18px); }
+  .mobile-dock a { display: flex; align-items: center; gap: .5rem; padding: .55rem .9rem; border-radius: .6rem; color: #cbd5e6; font-size: .85rem; font-weight: 750; text-decoration: none; }
+  .mobile-dock a:hover { background: rgb(255 255 255 / 9%); }
+  .mobile-dock a span { color: #a7ef7d; font-size: 1.1rem; }
+}
