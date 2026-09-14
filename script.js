@@ -41,11 +41,44 @@ const activityZipInput = document.querySelector("#activity-zip-input");
 const importStatus = document.querySelector("#import-status");
 const sampleRoutesStatus = document.querySelector("#sample-routes-status");
 const loadSampleRoutesButton = document.querySelector("#load-sample-routes");
+const shareAppButton = document.querySelector("#share-app");
 let isStravaConnected = false;
 let isGarminConnected = false;
 let currentLocation = null;
 let displayedRoutes = [];
 let importedRoutes = loadImportedRoutes();
+
+async function shareRidewise() {
+  const shareData = {
+    title: "Ridewise™",
+    text: "Plan your next cycling ride around the weather with Ridewise™.",
+    url: "https://achitwn78.github.io/Ridewise-Repo/",
+  };
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+    if (navigator.clipboard?.writeText) await navigator.clipboard.writeText(shareData.url);
+    else {
+      const copyField = document.createElement("textarea");
+      copyField.value = shareData.url;
+      copyField.setAttribute("readonly", "");
+      copyField.style.position = "fixed";
+      copyField.style.opacity = "0";
+      document.body.append(copyField);
+      copyField.select();
+      document.execCommand("copy");
+      copyField.remove();
+    }
+    const label = shareAppButton.querySelector("span");
+    label.textContent = "Link copied";
+    setTimeout(() => { label.textContent = "Share"; }, 1800);
+  } catch (error) {
+    if (error.name !== "AbortError") console.warn("Unable to share Ridewise", error);
+  }
+}
+shareAppButton?.addEventListener("click", shareRidewise);
 
 daySelect.innerHTML = weatherDays.map((day, index) => `<option value="${index}">${dayLabel(index)} · ${dayDate(index)}</option>`).join("");
 rideTimeSelect.innerHTML = weatherDays[0].hours.slice(1).map(item => `<option value="${item.hour}"${item.hour === 8 ? " selected" : ""}>${formatHour(item.hour)}</option>`).join("");
