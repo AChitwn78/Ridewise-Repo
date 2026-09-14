@@ -46,3 +46,11 @@ main { max-width: 75rem; margin: auto; padding: clamp(3rem, 8vw, 7rem) clamp(1.2
   .mobile-dock a:hover { background: rgb(255 255 255 / 9%); }
   .mobile-dock a span { color: #a7ef7d; font-size: 1.1rem; }
 }
+
+.hero-visual { margin: .8rem 0 1.35rem; overflow: hidden; aspect-ratio: 3 / 2; border: 1px solid rgb(167 239 125 / 20%); border-radius: 1.1rem; background: #16263b; box-shadow: 0 1.2rem 3rem rgb(0 0 0 / 24%); }
+.hero-visual img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; }
+@media (max-width: 48rem) { .hero-visual { margin: .65rem 0 1.15rem; border-radius: .9rem; } }
+
+.hero-visual { position: relative; }
+.hero-visual h1 { position: absolute; z-index: 1; top: 50%; left: clamp(.9rem, 4%, 1.6rem); width: 58%; margin: 0; transform: translateY(-50%); color: #fff; opacity: .7; font-size: clamp(2.325rem, 4.65vw, 3.975rem); line-height: 1.03; letter-spacing: -.06em; text-shadow: 0 2px 14px rgb(0 0 0 / 65%); }
+@media (max-width: 48rem) { .hero-visual h1 { width: 60%; font-size: clamp(2.175rem, 9vw, 3.3rem); } }

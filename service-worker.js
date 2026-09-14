@@ -1,5 +1,5 @@
-const CACHE_NAME = "ridewise-v28";
-const APP_FILES = ["./", "index.html", "styles.css", "script.js", "sample-routes.json", "manifest.webmanifest", "icon.svg", "qr-code.svg"];
+const CACHE_NAME = "ridewise-v31";
+const APP_FILES = ["./", "index.html", "styles.css", "script.js", "sample-routes.json", "manifest.webmanifest", "icon.svg", "qr-code.svg", "hero-cyclist-tailwind.jpg"];
 
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_FILES)));
